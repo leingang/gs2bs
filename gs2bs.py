@@ -33,13 +33,42 @@ def adjust_differential_spacing(line: str) -> str:
     pattern = r'\\\s*d'
     return re.sub(pattern, r'\\,d', line)
 
+def replace_quads(line: str) -> str:
+    """
+    Replaces LaTeX `\quad` with a single space.
+    This is useful for simplifying spacing in LaTeX expressions.
+    """
+    pattern = r'\\quad'
+    return re.sub(pattern, r'\\ ', line)
+
+def fix_nbsp_colon_nbsp(line: str) -> str:
+    """
+    Fixes the LaTeX `~` around colons by replacing `~:~` with `:`.
+    """
+    # Pattern to match `~:~` and replace it with `:`
+    pattern = r'~:~'
+    return re.sub(pattern, r':', line)
+
+def fix_internal_concatenation(line: str) -> str:
+    """
+    Fixes internal concatenation issues in LaTeX expressions to ensure proper
+    formatting. Substitutes `, \\ ` with `\\), \\(` 
+    """
+    # possibly empty whitespace, then a comma, then possibly more whitespace, then a backslash
+    # and a space, which is the LaTeX command for a full space in math mode.
+    pattern = r'\s*,\s*\\\s+' 
+    return re.sub(pattern, r"\), \(", line)
+
 def main(text: str) -> None:
     """
     Main function to read input text, filter, and display the converted text.
     """
-    text = delete_displaystyle(text)
-    text = adjust_differential_spacing(text)
     text = convert_delimiters(text)
+    text = delete_displaystyle(text)
+    text = replace_quads(text)
+    text = fix_nbsp_colon_nbsp(text)
+    text = fix_internal_concatenation(text)
+    text = adjust_differential_spacing(text)
     print(text)
     
 
